@@ -4,7 +4,7 @@ import { Account, User } from "../../mongodb/database.js";
 
 const router = express.Router();
 
-router.post("/", async (req, res) => {
+router.post("/", middleware, async (req, res) => {
     const { email } = req.body;
 
     const user = await User.findOne({
