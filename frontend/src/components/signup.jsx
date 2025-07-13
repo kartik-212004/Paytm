@@ -29,10 +29,9 @@ export default function Signup() {
         }
       );
 
-      if (response.status == 200) {
-        return navigate("/signin");
+      if (response.status === 200) {
+        navigate("/signin");
       }
-      setError(response.data.message);
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong");
     } finally {
