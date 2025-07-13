@@ -23,8 +23,15 @@ router.post("/signin", async (req, res) => {
       });
     }
 
+    const userPayload = {
+      userId: user._id,
+      email: user.email,
+      firstname: user.firstname,
+      lastname: user.lastname
+    };
+
     jwt.sign(
-      { email },
+      userPayload,
       process.env.JWT_SECRET,
       { expiresIn: "700h" },
       (err, token) => {
@@ -39,7 +46,12 @@ router.post("/signin", async (req, res) => {
           message: "Signin successful",
           status: 200,
           data: {
-            email,
+            user: {
+              id: user._id,
+              email: user.email,
+              firstname: user.firstname,
+              lastname: user.lastname
+            },
             token,
           },
         });

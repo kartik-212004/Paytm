@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { isAuthenticated } from "../utils/auth";
 
 export default function Signup() {
   const [data, setData] = useState({
@@ -12,6 +13,13 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user is already authenticated with valid token
+    if (isAuthenticated()) {
+      navigate('/');
+    }
+  }, [navigate]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -30,6 +38,10 @@ export default function Signup() {
       );
 
       if (response.status === 200) {
+        // Optionally store user data if returned from signup
+        if (response.data.data) {
+          localStorage.setItem('signupEmail', response.data.data.email);
+        }
         navigate("/signin");
       }
     } catch (err) {

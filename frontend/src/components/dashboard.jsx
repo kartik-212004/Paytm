@@ -1,16 +1,65 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  isAuthenticated,
+  getCurrentUser,
+  // logout,
+} from "../utils/auth";
 
 export default function Dashboard() {
+  const [user, setUser] = useState(null);
+  const [balance, setBalance] = useState(0);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/signin");
+      return;
+    }
+
+    const currentUser = getCurrentUser();
+    if (currentUser) {
+      setUser(currentUser);
+
+      setBalance(10000);
+    } else {
+      navigate("/signin");
+    }
+  }, [navigate]);
+
+  // const handleLogout = () => {
+  //   logout();
+  // };
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="p-8">
       <div className="max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">
+              Welcome, {user.firstname} {user.lastname}
+            </h1>
+            <p className="text-gray-600">{user.email}</p>
+          </div>
+          {/* <button
+            onClick={handleLogout}
+            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Logout
+          </button> */}
+        </div>
+
         {/* Balance Section */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">
             Your balance
           </h2>
           <p className="text-3xl font-bold text-gray-900">
-            Rs 10,000
+            Rs {balance.toLocaleString()}
           </p>
         </div>
 
