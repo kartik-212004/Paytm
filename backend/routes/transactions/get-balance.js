@@ -13,11 +13,11 @@ router.post("/", async (req, res) => {
     const account = await Account.findOne({
         userId: user._id
     })
-    const Amount_In_Rupees = account.balance / 100
+    const Amount_In_Rupees = (account.balance / 100).toFixed(2)
 
     res.json({
         message: `Balance Fetched - ${Amount_In_Rupees}`,
-        value: Amount_In_Rupees
+        value: parseFloat(Amount_In_Rupees)
     }).status(200)
 
 });
