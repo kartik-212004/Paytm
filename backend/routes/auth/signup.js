@@ -19,6 +19,17 @@ router.post("/signup", async (req, res) => {
       status: 400,
     });
   }
+
+  const existingUser = await User.findOne({
+    email: email
+  })
+  if (existingUser) {
+    return res.json({
+      message: "Account is already created with this Email",
+      status: 401
+    }).status(401)
+  }
+
   const user = await User.create({
     email: email,
     password: password,
