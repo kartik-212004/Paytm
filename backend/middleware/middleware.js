@@ -5,8 +5,7 @@ const middleware = (req, res, next) => {
 
   if (!token) {
     return res.status(401).json({
-      message: "No token provided",
-      status: 401,
+      message: "No token provided"
     });
   }
 
@@ -14,7 +13,6 @@ const middleware = (req, res, next) => {
     if (err) {
       return res.status(403).json({
         message: "Failed to authenticate token",
-        status: 403,
       });
     }
     req.user = decoded;

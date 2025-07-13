@@ -8,7 +8,7 @@ const router = express.Router();
 router.post("/", middleware, async (req, res) => {
     const { senderAddress, recieverAddress, amount } = req.body;
     console.log(senderAddress, recieverAddress, amount)
-    const FinalAmount = Math.round(Number(amount) * 100) / 100;
+    const FinalAmount = Math.round(Number(amount) * 100);
 
     const session = await mongoose.startSession();
     // session.startTransaction();
