@@ -9,7 +9,11 @@ router.get("/", middleware, async (req, res) => {
     console.log(search);
 
     const queryUser = await User.find({
-      name: { $regex: `${search}`, $options: "i" },
+      $or: [
+        { firstname: { $regex: `${search}`, $options: "i" } },
+        { lastname: { $regex: `${search}`, $options: "i" } },
+        { email: { $regex: `${search}`, $options: "i" } }
+      ]
     });
 
     res.json({

@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   isAuthenticated,
   getCurrentUser,
-  // logout,
+  logout,
 } from "../utils/auth";
+import api from "../utils/api";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [balance, setBalance] = useState(0);
+  const [users, setUsers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,16 +24,93 @@ export default function Dashboard() {
     const currentUser = getCurrentUser();
     if (currentUser) {
       setUser(currentUser);
-
-      setBalance(10000);
     } else {
       navigate("/signin");
     }
   }, [navigate]);
 
-  // const handleLogout = () => {
-  //   logout();
-  // };
+  const fetchBalance = useCallback(async () => {
+    try {
+      const response = await api.post("/balance", {
+        email: user?.email,
+      });
+      if (response.data.value) {
+        setBalance(response.data.value);
+      }
+    } catch (error) {
+      console.error("Error fetching balance:", error);
+    }
+  }, [user]);
+
+  const fetchAllUsers = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await api.get("/allUsers");
+      if (response.data.users) {
+        // Filter out the current user from the list
+        const filteredUsers = response.data.users.filter(
+          (u) => u._id !== user?.id
+        );
+        setUsers(filteredUsers);
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+  useEffect(() => {
+    if (user) {
+      fetchAllUsers();
+      fetchBalance();
+    }
+  }, [user, fetchAllUsers, fetchBalance]);
+
+  const searchUsers = useCallback(
+    async (searchQuery) => {
+      if (!searchQuery.trim()) {
+        fetchAllUsers();
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const response = await api.get(
+          `/users?search=${searchQuery}`
+        );
+        if (response.data.users) {
+          // Filter out the current user from the search results
+          const filteredUsers = response.data.users.filter(
+            (u) => u._id !== user?.id
+          );
+          setUsers(filteredUsers);
+        }
+      } catch (error) {
+        console.error("Error searching users:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [user, fetchAllUsers]
+  );
+
+  const handleSearchChange = useCallback(
+    (e) => {
+      const value = e.target.value;
+      setSearchTerm(value);
+
+      // Debounce search
+      clearTimeout(window.searchTimeout);
+      window.searchTimeout = setTimeout(() => {
+        searchUsers(value);
+      }, 300);
+    },
+    [searchUsers]
+  );
+
+  const handleLogout = () => {
+    logout();
+  };
 
   if (!user) {
     return <div>Loading...</div>;
@@ -45,12 +126,12 @@ export default function Dashboard() {
             </h1>
             <p className="text-gray-600">{user.email}</p>
           </div>
-          {/* <button
+          <button
             onClick={handleLogout}
             className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
           >
             Logout
-          </button> */}
+          </button>
         </div>
 
         {/* Balance Section */}
@@ -74,27 +155,54 @@ export default function Dashboard() {
             <input
               type="text"
               placeholder="Search users..."
+              value={searchTerm}
+              onChange={handleSearchChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           {/* User List */}
           <div className="bg-white rounded-lg shadow-sm">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                  <span className="text-gray-700 font-semibold">
-                    H
-                  </span>
-                </div>
-                <span className="text-gray-800 font-medium">
-                  Harkirat Singh
-                </span>
+            {loading ? (
+              <div className="p-4 text-center">
+                <p className="text-gray-500">Loading users...</p>
               </div>
-              <button className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">
-                Send Money
-              </button>
-            </div>
+            ) : users.length === 0 ? (
+              <div className="p-4 text-center">
+                <p className="text-gray-500">No users found</p>
+              </div>
+            ) : (
+              users.map((userItem) => (
+                <div
+                  key={userItem._id}
+                  className="flex items-center justify-between p-4 border-b border-gray-200 last:border-b-0"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                      <span className="text-gray-700 font-semibold">
+                        {userItem.firstname.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-800 font-medium block">
+                        {userItem.firstname} {userItem.lastname}
+                      </span>
+                      <span className="text-gray-500 text-sm">
+                        {userItem.email}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() =>
+                      navigate("/send", { state: { user: userItem } })
+                    }
+                    className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+                  >
+                    Send Money
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
