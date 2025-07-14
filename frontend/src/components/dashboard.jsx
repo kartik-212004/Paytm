@@ -31,23 +31,20 @@ export default function Dashboard() {
 
   const fetchBalance = useCallback(async () => {
     try {
-      const response = await api.post("/balance", {
-        email: user?.email,
-      });
-      if (response.data.value) {
+      const response = await api.post("/balance", {});
+      if (response.data.value !== undefined) {
         setBalance(response.data.value);
       }
     } catch (error) {
       console.error("Error fetching balance:", error);
     }
-  }, [user]);
+  }, []);
 
   const fetchAllUsers = useCallback(async () => {
     try {
       setLoading(true);
       const response = await api.get("/allUsers");
       if (response.data.users) {
-        // Filter out the current user from the list
         const filteredUsers = response.data.users.filter(
           (u) => u._id !== user?.id
         );
@@ -79,7 +76,6 @@ export default function Dashboard() {
           `/users?search=${searchQuery}`
         );
         if (response.data.users) {
-          // Filter out the current user from the search results
           const filteredUsers = response.data.users.filter(
             (u) => u._id !== user?.id
           );
@@ -194,7 +190,12 @@ export default function Dashboard() {
                   </div>
                   <button
                     onClick={() =>
-                      navigate("/send", { state: { user: userItem } })
+                      navigate("/send", {
+                        state: {
+                          receiver: userItem.email,
+                          sender: user,
+                        },
+                      })
                     }
                     className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
                   >

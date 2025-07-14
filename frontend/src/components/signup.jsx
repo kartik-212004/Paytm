@@ -15,9 +15,8 @@ export default function Signup() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is already authenticated with valid token
     if (isAuthenticated()) {
-      navigate('/');
+      navigate("/");
     }
   }, [navigate]);
 
@@ -38,9 +37,11 @@ export default function Signup() {
       );
 
       if (response.status === 200) {
-        // Optionally store user data if returned from signup
         if (response.data.data) {
-          localStorage.setItem('signupEmail', response.data.data.email);
+          localStorage.setItem(
+            "signupEmail",
+            response.data.data.email
+          );
         }
         navigate("/signin");
       }

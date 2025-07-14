@@ -13,7 +13,6 @@ export default function Signin() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is already authenticated with valid token
     if (isAuthenticated()) {
       navigate('/');
     }

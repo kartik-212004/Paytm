@@ -1,2 +1,1 @@
-
-## Build a basic version of PayTM
+I was getting bored so i built this payment clone (nothing else)
