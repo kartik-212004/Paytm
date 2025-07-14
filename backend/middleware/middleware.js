@@ -15,6 +15,7 @@ const middleware = (req, res, next) => {
         message: "Failed to authenticate token",
       });
     }
+    console.log("Decoded JWT:", decoded);
     req.user = decoded;
     next();
   });

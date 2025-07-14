@@ -39,10 +39,13 @@ router.post("/signup", async (req, res) => {
     });
 
     const userId = user._id;
-    await Account.create({
+    const account = await Account.create({
       userId: userId,
-      balance: (Math.floor((1 + Math.random() * 200000) * 100)) / 100
+      balance: Math.floor((1 + Math.random() * 200000) * 100) // Store in paisa (cents)
     });
+
+    console.log("User created:", user._id);
+    console.log("Account created:", account._id, "with balance:", account.balance);
 
     res.status(200).json({
       message: "Account created successfully",
